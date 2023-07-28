@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
   SentenceSegment,
-  buildSentence,
+  makeSentence,
   isSentenceSegmentAnchor,
   isSentenceSegmentElement,
   isSentenceSegmentGeneral,
@@ -133,13 +133,13 @@ describe('isSentenceSegmentGeneral', () => {
   });
 });
 
-describe('buildSentence', () => {
+describe('makeSentence', () => {
   test('without arguments', () => {
-    expect(buildSentence()).toEqual(<></>);
+    expect(makeSentence()).toEqual(<></>);
   });
 
   test('returns a sentence text', () => {
-    const Sentence = () => <>{buildSentence(['one', 'two'])}</>;
+    const Sentence = () => <>{makeSentence(['one', 'two'])}</>;
     const { getByText } = render(<Sentence />);
     expect(getByText('one two')).toBeTruthy();
   });
@@ -148,7 +148,7 @@ describe('buildSentence', () => {
     const One = () => <>one</>;
     const Two = () => <>two</>;
     const Sentence = () => (
-      <>{buildSentence([<One key="one" />, <Two key="two" />])}</>
+      <>{makeSentence([<One key="one" />, <Two key="two" />])}</>
     );
     const { getByText } = render(<Sentence />);
     expect(getByText('one two')).toBeTruthy();
@@ -158,7 +158,7 @@ describe('buildSentence', () => {
     const One = () => <>one</>;
     const Sentence = () => (
       <>
-        {buildSentence([
+        {makeSentence([
           <One key="one" />,
           'two',
           ['click', 'b'],
@@ -179,17 +179,16 @@ describe('buildSentence', () => {
 });
 
 describe('useSentence', () => {
-  test('returns buildSentence', () => {
+  test('returns makeSentence', () => {
     const One = () => <>one</>;
     const Sentence = () => {
-      const sentence = useSentence([
+      return useSentence([
         <One key="one" />,
         'two',
         ['click', 'b'],
         ['the following:', 'i', { tabIndex: -1 }],
         ['anchor text', { href: 'www.google.com' }],
       ]);
-      return <>{sentence}</>;
     };
     const { getByText, container } = render(<Sentence />);
     expect(container.querySelector('a[href="www.google.com"]')).toBeTruthy();

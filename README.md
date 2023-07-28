@@ -4,6 +4,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 `sentence` is a simple state tracker for a number you want to add to.
+Full typescript support.
 
 # Installation
 ```bash
@@ -14,105 +15,65 @@ Or with `npm`
 npm install --save @react-noui/sentence
 ```
 
-# Example
-This example shows how you can track different values.
-```jsx
-import { createCounter } from '@react-noui/sentence';
-// Tracks the total number of clicks within it.
-const ClickCounter = createCounter();
-// Tracks the total async time spent in ms.
-const AsyncTimer = createCounter();
+# Examples
 
-function App() {
+### Static sentence component
+```tsx
+import { makeSentence } from '@react-noui/sentence'
+
+const SupportSentence = makeSentence(
+  [
+    'Please visit our',
+    ['support page', { href: 'https://example.com/support' }],
+    'or email our',
+    ['support team', { href: 'mailto:support@domain.com' }],
+    'for assistance.',
+  ]
+);
+
+function ErrorPage({ error }: { error: Error }) {
   return (
-    <AsyncTimer.Provider>
-      <ClickCounter.Provider>
-        TOTAL CLICKS <ShowClicks />
-        <ClickCounter.Provider>
-          CLICK A TOTAL: <ShowClicks />
-          <AddButton>Button A</AddButton>
-        </ClickCounter.Provider>
-        <ClickCounter.Provider>
-          CLICK B TOTAL: <ShowClicks />
-          <AddButton>Button B</AddButton>
-        </ClickCounter.Provider>
-      </ClickCounter.Provider>
-    </AsyncTimer.Provider>
-  )
-}
-
-function ShowClicks() {
-  const { count } = useCounter(ClickCounter);
-  return <span>{count}</span>
-}
-function AddButton({children}) {
-  const { add: addClick } = useCounter(ClickCounter);
-  const { add: addTime } = useCounter(AsyncTimer);
-  const handleClick = useCallback(() => {
-    const backThen = Date.now();
-    addClick();
-    fetch('/stuff').then(() => {
-      addTime(Date.now() - backThen);
-    });
-  }, [addClick, addTime]);
-  return <button onClick={handleClick}>{children}</button>;
-}
-```
-In the above example, clicking `Button A` will add `1` to the totals of `CLICK A TOTAL`, and `TOTAL CLICKS`. Likewise clicking `Button B` will update the totals of `CLICK B TOTAL` and `TOTAL CLICKS`. Any nested `ClickCounter.add` call will update the total of itself _and_ any composed parents.
-
----
-# Docs
-
-## `const MyCounter = createCounter()`
-
-Creates a custom, nestable React `Context` and `Provider`.
-
-**Returns**
-```typescript
-{
-  Context: React.Context<{
-    add: (n: number = 1) => void;
-    count: number;
-  }>
-  Provider: (props: React.PropsWithChildren) => React.JSX.Element;
-}
-```
-**Use**
-```jsx
-import { createCounter } from '@react-noui/sentence';
-
-export const MyCounter = createCounter();
-export function MyCountedThing() {
-  return (
-    <MyCounter.Provider>
-      {/**/}
-    </MyCounter.Provider>
+    <div>
+      {`${error}`}
+      <SupportSentence />
+    </div>
   )
 }
 ```
 
-## `useCounter(MyCounter)`
+### Dynamic sentence hook
+```tsx
+import { useSentence } from '@react-noui/sentence'
+import { Link } from 'react-router'
 
-React hook and shortcut to `React.useContext(MyCounter.Context)`.
+interface DataItemLocal {
+  name: string;
+  localPath: string;
+}
+interface DataItemExternal {
+  name: string;
+  href: string;
+}
+type DataItem = DataItemLocal | DataItemExternal | string;
+const isExternal = (data: DataItem): data is DataItemExternal => Boolean(data.href);
 
-**Returns**
-
-```typescript
-const context: {
-  count: number;
-  add: (n: number = 1) => void;
-} = useCounter(MyCounter);
-```
-
-**Use**
-```jsx
-function ShowMyCount() {
-  const { count, add } = useCounter(MyCounter);
-  return (
-    <button onClick={() => add()}>
-      I've been clicked {count} times
-    </button>
+function HumanizeInput({ dataItems }: { dataItems: DataItem[] }) {
+  return useSentence(
+    useMemo(() => dataItems.map((data) => {
+      if (typeof data === 'string') return data;
+      if (isExternal(data)) return [data.name, { href: data.href }]
+      return <Link key={data.name} to={data.localPath}>{data.name}</Link>
+    }), [dataItems])
   );
 }
-```
 
+function References() {
+  const books: DataItem[] = useBookData();
+  return (
+    <div>
+      <h1>References of books</h1>
+      <HumanizeInput dataItems={books} />
+    </div>
+  )
+}
+```

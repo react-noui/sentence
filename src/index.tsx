@@ -5,7 +5,7 @@ import React, {
   useMemo,
 } from 'react';
 
-function buildSentenceSegment(
+function makeSentenceSegment(
   segment: SentenceSegment,
   i: number,
   arr: SentenceSegment[],
@@ -66,13 +66,13 @@ export function isSentenceSegmentGeneral(
   return SENTENCESEGMENTSUPPORTEDTAGS.includes(segment[1]);
 }
 
-export function buildSentence(segments?: SentenceSegment[]) {
+export function makeSentence(segments?: SentenceSegment[]) {
   if (!segments) return <></>;
-  return <>{segments.map(buildSentenceSegment)}</>;
+  return <>{segments.map(makeSentenceSegment)}</>;
 }
 
 export function useSentence(segments: SentenceSegment[]) {
-  return useMemo(() => buildSentence(segments), [segments]);
+  return useMemo(() => makeSentence(segments), [segments]);
 }
 
 export type SupportedIntrinsicElements = Pick<
