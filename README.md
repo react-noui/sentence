@@ -81,10 +81,41 @@ function References() {
 # API
 
 ### `makeSentence(segments?: SentenceSegment[]): JSX.Element`
+A `SentenceSegment` describes the composition of a part of a sentence.
 ```tsx
 const segments: SentenceSegment[] = [
   'just a string',
-  ['italic', 'i'],
-  [<i>italic and bold</i>, 'b'],
+  ['italic string wrapped in "i" tag', 'i'],
+  [<i>italic element wrapped in {'"'}b{'"'} tag</i>, 'b'],
+  [<i>italic element wrapped in {'"'}b{'"'} tag</i>, 'b', { 'aria-label': 'foobar' }],
+  ['text for an anchor tag', { href: 'abc.com' }],
+  [<i>italic element wrapped in anchor tag</i>, { href: 'abc.com' }],
 ]
+```
+A sentence can be composed by memoizing the returned sentence segments.
+```tsx
+type User = {
+  name: string;
+  email?: string;
+  website?: string;
+}
+function UserDescription({ user }: { user: User }) {
+  const userDescription = useUserDescription(user);
+  return (
+    <div>
+      <h3>{user.name}</h3>
+      <p>{userDescription}</p>
+    </div>
+  )
+}
+
+function useUserDescription(user: User) {
+  return useMemo(() => {
+    let segments: SentenceSegment[] = [];
+    if (user.email) {
+      segments.push([`Email me ${user.email}`, { href: `mailto:${user.email}` }]);
+    }
+    return makeSentence(segments);
+  }, [user]);
+}
 ```

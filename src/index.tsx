@@ -75,11 +75,12 @@ export function useSentence(segments: SentenceSegment[]) {
   return useMemo(() => makeSentence(segments), [segments]);
 }
 
-// type SentenceSegmentGeneral = string | JSX.Element;
-
+type RequiredAnchorAttributes = AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string;
+};
 type SentenceSegmentAnchor =
-  | [string, AnchorHTMLAttributes<HTMLAnchorElement>]
-  | [JSX.Element, AnchorHTMLAttributes<HTMLAnchorElement>];
+  | [string, RequiredAnchorAttributes]
+  | [JSX.Element, RequiredAnchorAttributes];
 
 type SentenceSegmentWrap =
   | [string, keyof SupportedIntrinsicElements]
