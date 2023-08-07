@@ -77,3 +77,14 @@ function References() {
   )
 }
 ```
+
+# API
+
+### `makeSentence(segments?: SentenceSegment[]): JSX.Element`
+```tsx
+const segments: SentenceSegment[] = [
+  'just a string',
+  ['italic', 'i'],
+  [<i>italic and bold</i>, 'b'],
+]
+```

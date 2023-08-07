@@ -20,10 +20,9 @@ function makeSentenceSegment(
     const [text, attributes] = segment;
     node = <a {...attributes}>{text}</a>;
   }
-  if (isSentenceSegmentGeneral(segment)) {
+  if (isSentenceSegmentWrap(segment)) {
     const [text, tag, attributes = {}] = segment;
-    const Tag = tag;
-    node = <Tag {...attributes}>{text}</Tag>;
+    node = React.createElement(tag, attributes, text);
   }
   return (
     <Fragment key={key}>
@@ -49,6 +48,7 @@ export function isSentenceSegmentElement(
 export function isSentenceSegmentAnchor(
   segment: SentenceSegment,
 ): segment is SentenceSegmentAnchor {
+  if (isSentenceSegmentText(segment)) return false;
   if (isSentenceSegmentElement(segment)) return false;
   return (
     segment.length === 2 &&
@@ -57,9 +57,9 @@ export function isSentenceSegmentAnchor(
   );
 }
 
-export function isSentenceSegmentGeneral(
+export function isSentenceSegmentWrap(
   segment: SentenceSegment,
-): segment is SentenceSegmentGeneral {
+): segment is SentenceSegmentWrap {
   if (isSentenceSegmentText(segment)) return false;
   if (isSentenceSegmentElement(segment)) return false;
   if (isSentenceSegmentAnchor(segment)) return false;
@@ -75,36 +75,32 @@ export function useSentence(segments: SentenceSegment[]) {
   return useMemo(() => makeSentence(segments), [segments]);
 }
 
+// type SentenceSegmentGeneral = string | JSX.Element;
+
+type SentenceSegmentAnchor =
+  | [string, AnchorHTMLAttributes<HTMLAnchorElement>]
+  | [JSX.Element, AnchorHTMLAttributes<HTMLAnchorElement>];
+
+type SentenceSegmentWrap =
+  | [string, keyof SupportedIntrinsicElements]
+  | [string, keyof SupportedIntrinsicElements, HTMLAttributes<HTMLElement>]
+  | [JSX.Element, keyof SupportedIntrinsicElements]
+  | [
+      JSX.Element,
+      keyof SupportedIntrinsicElements,
+      HTMLAttributes<HTMLElement>,
+    ];
+
+export type SentenceSegment =
+  | string
+  | JSX.Element
+  | SentenceSegmentAnchor
+  | SentenceSegmentWrap;
+
 export type SupportedIntrinsicElements = Pick<
   JSX.IntrinsicElements,
   SentenceSegmentSupportedTags
 >;
-
-export type SentenceSegmentText = string | JSX.Element;
-export type SentenceSegmentAnchor = [
-  SentenceSegmentText,
-  AnchorHTMLAttributes<HTMLAnchorElement>,
-];
-
-type SentenceSegmentGeneralTag = [
-  SentenceSegmentText,
-  keyof SupportedIntrinsicElements,
-];
-
-type SentenceSegmentGeneralTagAttributes = [
-  SentenceSegmentText,
-  keyof SupportedIntrinsicElements,
-  HTMLAttributes<HTMLElement>,
-];
-
-export type SentenceSegmentGeneral =
-  | SentenceSegmentGeneralTag
-  | SentenceSegmentGeneralTagAttributes;
-
-export type SentenceSegment =
-  | SentenceSegmentGeneral
-  | SentenceSegmentAnchor
-  | SentenceSegmentText;
 
 export type SentenceSegmentSupportedTags =
   (typeof SENTENCESEGMENTSUPPORTEDTAGS)[number];

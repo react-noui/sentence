@@ -1,12 +1,12 @@
 import { render } from '@testing-library/react';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import {
   SentenceSegment,
   makeSentence,
   isSentenceSegmentAnchor,
   isSentenceSegmentElement,
-  isSentenceSegmentGeneral,
+  isSentenceSegmentWrap,
   isSentenceSegmentText,
   useSentence,
 } from '..';
@@ -103,7 +103,7 @@ describe('isSentenceSegmentAnchor', () => {
   });
 });
 
-describe('isSentenceSegmentGeneral', () => {
+describe('isSentenceSegmentWrap', () => {
   test.each<{
     segment: SentenceSegment;
     expected: boolean;
@@ -129,7 +129,7 @@ describe('isSentenceSegmentGeneral', () => {
       expected: true,
     },
   ])('$segment should be $expected', ({ segment, expected }) => {
-    expect(isSentenceSegmentGeneral(segment)).toEqual(expected);
+    expect(isSentenceSegmentWrap(segment)).toEqual(expected);
   });
 });
 
